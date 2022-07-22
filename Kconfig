@@ -1,0 +1,7 @@
+# Kconfig for zephyr
+config CONFIG_ZEPHYR_HDL
+	bool "Use HDL for display"
+	depends on SPI
+	depends on HEAP_MEM_POOL_SIZE != 0
+	help
+	  Enable HDL
