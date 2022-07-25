@@ -187,6 +187,13 @@ struct HDL_Element {
 #endif
 };
 
+struct HDL_Bounds {
+    uint16_t x;
+    uint16_t y;
+    uint16_t w;
+    uint16_t h;
+};
+
 // HDL display interfaces
 struct HDL_Interface {
     // Width of the screen
@@ -217,10 +224,13 @@ struct HDL_Interface {
     // Text height on size 1 font
     uint8_t textHeight;
 
+    // Area to re-render
+    struct HDL_Bounds dirtyArea;
+
     // Display driver interfaces
 
     // Clear screen
-    void (*f_clear)();
+    void (*f_clear)(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
     // Set color
     void (*f_setColor)(uint8_t r, uint8_t g, uint8_t b);
     // Fast horizontal line
@@ -232,8 +242,11 @@ struct HDL_Interface {
     // Set pixel
     void (*f_pixel)(uint16_t x, uint16_t y);
 
-    // Render the screen
+    // Render the whole screen
     void (*f_render)();
+    // Render part of the screen, useful for e-paper displays
+    void (*f_renderPart)(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+
 
 };
 
