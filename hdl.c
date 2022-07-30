@@ -6,8 +6,8 @@
 
 #ifdef CONFIG_ZEPHYR_HDL
     // Use k_malloc on zephyr
-    #define HMALLOC     k_malloc
-    #define HFREE       k_free
+    #define HMALLOC     malloc
+    #define HFREE       free
 
 #else
     // Default malloc on other platforms
