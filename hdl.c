@@ -5,9 +5,10 @@
 #include <math.h>
 
 #ifdef CONFIG_ZEPHYR_HDL
+    #include <kernel.h>
     // Use k_malloc on zephyr
-    #define HMALLOC     malloc
-    #define HFREE       free
+    #define HMALLOC     k_malloc
+    #define HFREE       k_free
 
 #else
     // Default malloc on other platforms
