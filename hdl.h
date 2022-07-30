@@ -16,8 +16,11 @@
 #define HDL_FEAT_ARC        0b1000
 
 // Element flags
-// Dirty flag
-#define HDL_FLAG_DIRTY      0b1
+// Dirty - content changed
+#define HDL_FLAG_CONTENT_CHANGED        0b1
+// Dirty - bounds changed
+#define HDL_FLAG_BOUNDS_CHANGED         0b01
+
 
 #define HDL_FLEX_ROW            0x01
 #define HDL_FLEX_COLUMN         0x02
@@ -223,9 +226,6 @@ struct HDL_Interface {
     uint8_t textWidth;
     // Text height on size 1 font
     uint8_t textHeight;
-
-    // Area to re-render
-    struct HDL_Bounds dirtyArea;
 
     // Display driver interfaces
 

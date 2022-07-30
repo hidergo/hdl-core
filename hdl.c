@@ -52,14 +52,6 @@ struct HDL_Interface HDL_CreateInterface (uint16_t width, uint16_t height, enum 
     interface.textWidth = 8;
     interface.textHeight = 8;
 
-    // Set dirty area to full screen
-    interface.dirtyArea = (struct HDL_Bounds){
-        0,
-        0,
-        width,
-        height
-    };
-
     return interface;
 }
 
@@ -810,18 +802,19 @@ int HDL_Update (struct HDL_Interface *interface) {
     if(interface->root == NULL)
         return HDL_ERR_NO_ROOT;
 
-    // Reset dirtyArea, set x, y to screen width, height and w, h to 0, 0
-    interface->dirtyArea = (struct HDL_Bounds){
-        interface->width, interface->height, 0, 0,
-    };
-
     // TODO: clear screen?
     interface->f_clear(0, 0, interface->width, interface->height);
 
     _hdl_handleElement(interface, interface->root);
 
     // Use partial refresh rather than full refresh if defined
-    interface->f_render();
+    if(interface->f_renderPart != NULL) {
+        // TODO: render only changed parts!
+        interface->f_renderPart(0, 0, interface->width, interface->height);
+    }
+    else {
+        interface->f_render();
+    }
 
     return 0;
 }
