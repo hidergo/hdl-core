@@ -398,10 +398,10 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
     if(interface->f_pixel != NULL && element->attrs.image != 0xFF) {
         if(interface->bitmapCount > element->attrs.image) {
             struct HDL_Bitmap *bmp = &interface->bitmaps[element->attrs.image];
-            int px = 0;
+            int pad_width = (bmp->width + 7) / 8;
             for(int y = 0; y < bmp->height; y++) {
                 for(int x = 0; x < bmp->width; x++) {
-                    uint8_t bmpData = bmp->data[px / 8] & (1 << (7 - (px % 8)));
+                    uint8_t bmpData = bmp->data[y * pad_width + x / 8] & (1 << (7 - (x % 8)));
                     if(bmpData) {
                         for(int sx = 0; sx < element->attrs.size; sx++) {
                             for(int sy = 0; sy < element->attrs.size; sy++) {
@@ -409,7 +409,6 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
                             }
                         }
                     }
-                    px++;
                 }
             }
         }
