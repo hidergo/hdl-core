@@ -230,22 +230,22 @@ struct HDL_Interface {
     // Display driver interfaces
 
     // Clear screen
-    void (*f_clear)(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+    void (*f_clear)(int16_t x, int16_t y, uint16_t w, uint16_t h);
     // Set color
     void (*f_setColor)(uint8_t r, uint8_t g, uint8_t b);
     // Fast horizontal line
-    void (*f_hline)(uint16_t sx, uint16_t sy, int16_t len);
+    void (*f_hline)(int16_t sx, int16_t sy, int16_t len);
     // Fast vertical line
-    void (*f_vline)(uint16_t sx, uint16_t sy, int16_t len); 
+    void (*f_vline)(int16_t sx, int16_t sy, int16_t len); 
     // Text
-    void (*f_text)(uint16_t x, uint16_t y, const char *text, uint8_t fontSize);
+    void (*f_text)(int16_t x, int16_t y, const char *text, uint8_t fontSize);
     // Set pixel
-    void (*f_pixel)(uint16_t x, uint16_t y);
+    void (*f_pixel)(int16_t x, int16_t y);
 
     // Render the whole screen
     void (*f_render)();
     // Render part of the screen, useful for e-paper displays
-    void (*f_renderPart)(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+    void (*f_renderPart)(int16_t x, int16_t y, uint16_t w, uint16_t h);
 
 
 };

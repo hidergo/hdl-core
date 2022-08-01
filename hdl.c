@@ -253,8 +253,8 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
         totalFlex += child->attrs.flex;
     }
 
-    uint16_t curFlexX = element->attrs.x;
-    uint16_t curFlexY = element->attrs.y;
+    int16_t curFlexX = element->attrs.x;
+    int16_t curFlexY = element->attrs.y;
     
     // Loop through children
 #ifdef HDL_CONF_STATIC_CHILDREN_COUNT
@@ -273,7 +273,7 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
         child->attrs.y = curFlexY;
 
         if(element->attrs.flexDir == HDL_FLEX_ROW) {
-            uint16_t addF = (uint16_t)ceilf((float)child->attrs.flex / (float)totalFlex * element->attrs.width);
+            int16_t addF = (uint16_t)ceilf((float)child->attrs.flex / (float)totalFlex * element->attrs.width);
             // Set child width
             child->attrs.width = addF;
             // Height from parent
@@ -282,7 +282,7 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
             curFlexX += addF;
         }
         else if(element->attrs.flexDir == HDL_FLEX_COLUMN) {
-            uint16_t addF = (uint16_t)ceilf((float)child->attrs.flex / (float)totalFlex * element->attrs.height);
+            int16_t addF = (uint16_t)ceilf((float)child->attrs.flex / (float)totalFlex * element->attrs.height);
             // Set child height
             child->attrs.height = addF;
             // Width from parent
@@ -306,8 +306,8 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
     */
 
     // Set alignment point
-    uint16_t align_x = 0;
-    uint16_t align_y = 0;
+    int16_t align_x = 0;
+    int16_t align_y = 0;
 
     uint8_t hzAlign = element->attrs.align >> 4;
     uint8_t vtAlign = element->attrs.align & 0xF;
@@ -383,8 +383,8 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
         }
     }
 
-    uint16_t aligned_x = align_x + element->attrs.x + element->attrs.padding_x;
-    uint16_t aligned_y = align_y + element->attrs.y + element->attrs.padding_y;
+    int16_t aligned_x = align_x + element->attrs.x + element->attrs.padding_x;
+    int16_t aligned_y = align_y + element->attrs.y + element->attrs.padding_y;
 
 
     if(interface->f_text != NULL && element->content != NULL) {
