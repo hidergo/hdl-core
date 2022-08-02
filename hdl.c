@@ -249,6 +249,16 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
         if(element->children[i] == 0xFF)
             continue;
 
+        if(element->tag == HDL_TAG_SWITCH) {
+            // Set disabled value according to element's value
+            if(element->attrs.value == i) {
+                interface->elements[element->children[i]].attrs.disabled = 0;
+            }
+            else {
+                interface->elements[element->children[i]].attrs.disabled = 1;
+            }
+        }
+
         struct HDL_Element *child = &interface->elements[element->children[i]];
         if(child->attrs.disabled)
             continue;
@@ -269,6 +279,7 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
             continue;
 
         struct HDL_Element *child = &interface->elements[element->children[i]];
+
         if(child->attrs.disabled)
             continue;
 
