@@ -347,9 +347,10 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
         contH *= (interface->textHeight + 1) * element->attrs.size;
     }
     if(element->attrs.image != 0xFF) {
+
         // Get image size
-        uint16_t imgWidth = interface->bitmaps[element->attrs.image].width * element->attrs.size;
-        uint16_t imgHeight = interface->bitmaps[element->attrs.image].height * element->attrs.size;
+        uint16_t imgWidth = interface->bitmaps[element->attrs.image].sprite_width * element->attrs.size;
+        uint16_t imgHeight = interface->bitmaps[element->attrs.image].sprite_height * element->attrs.size;
 
         if(contW < imgWidth) {
             contW = imgWidth;
@@ -418,11 +419,11 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
             int pad_width = (bmp->width + 7) / 8;
             uint16_t sprite_xp = bmp->sprite_width * element->attrs.sprite;
             uint16_t start_x = sprite_xp % bmp->width;
-            uint16_t start_y = sprite_xp / bmp->width;
+            uint16_t start_y = (sprite_xp / bmp->width) * bmp->sprite_height;
 
-            for(int y = start_x; y < bmp->sprite_height; y++) {
-                for(int x = start_y; x < bmp->sprite_width; x++) {
-                    uint8_t bmpData = bmp->data[y * pad_width + x / 8] & (1 << (7 - (x % 8)));
+            for(int y = 0; y < bmp->sprite_height; y++) {
+                for(int x = 0; x < bmp->sprite_width; x++) {
+                    uint8_t bmpData = bmp->data[(y + start_y) * pad_width + (x + start_x) / 8] & (1 << (7 - ((x + start_y) % 8)));
                     if(bmpData) {
                         for(int sx = 0; sx < element->attrs.size; sx++) {
                             for(int sy = 0; sy < element->attrs.size; sy++) {
@@ -786,6 +787,10 @@ int _hdl_buildBitmap (struct HDL_Interface *interface, struct HDL_Bitmap *bmp, u
     (*pc) += 2;
     bmp->height = *(uint16_t*)&data[*pc];
     (*pc) += 2;
+    bmp->sprite_width = *(uint8_t*)&data[*pc];
+    (*pc) += 1;
+    bmp->sprite_height = *(uint8_t*)&data[*pc];
+    (*pc) += 1;
     bmp->colorMode = data[*pc];
     (*pc) += 1;
 
