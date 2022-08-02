@@ -64,6 +64,7 @@ enum HDL_AttrIndex {
     HDL_ATTR_SIZE       = 10, // Bitmap size (+ font size)
     HDL_ATTR_DISABLED   = 11, // Disabled
     HDL_ATTR_VALUE      = 12, // Value
+    HDL_ATTR_SPRITE     = 13, // Sprite index
 };
 
 
@@ -82,6 +83,8 @@ struct HDL_Bitmap {
     uint16_t size;
     uint16_t width;
     uint16_t height;
+    uint8_t sprite_width;
+    uint8_t sprite_height;
     uint8_t colorMode;
     uint8_t *data;
 };
@@ -139,6 +142,9 @@ struct HDL_Attrs {
 
     // Value - TODO: should be any type
     uint8_t value;
+
+    // Sprite index
+    uint8_t sprite;
 };
 #endif
 

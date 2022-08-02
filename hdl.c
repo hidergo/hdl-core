@@ -224,6 +224,9 @@ int _hdl_handleBoundAttrs (struct HDL_Interface *interface, struct HDL_Element *
             case HDL_ATTR_VALUE:
                 element->attrs.value = *(uint8_t*)HDL_GetBinding(interface, battr->bind.value);
                 break;
+            case HDL_ATTR_SPRITE:
+                element->attrs.sprite = *(uint8_t*)HDL_GetBinding(interface, battr->bind.value);
+                break;
         }
     }
     return 0;
@@ -413,8 +416,12 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
         if(interface->bitmapCount > element->attrs.image) {
             struct HDL_Bitmap *bmp = &interface->bitmaps[element->attrs.image];
             int pad_width = (bmp->width + 7) / 8;
-            for(int y = 0; y < bmp->height; y++) {
-                for(int x = 0; x < bmp->width; x++) {
+            uint16_t sprite_xp = bmp->sprite_width * element->attrs.sprite;
+            uint16_t start_x = sprite_xp % bmp->width;
+            uint16_t start_y = sprite_xp / bmp->width;
+
+            for(int y = start_x; y < bmp->sprite_height; y++) {
+                for(int x = start_y; x < bmp->sprite_width; x++) {
                     uint8_t bmpData = bmp->data[y * pad_width + x / 8] & (1 << (7 - (x % 8)));
                     if(bmpData) {
                         for(int sx = 0; sx < element->attrs.size; sx++) {
@@ -545,6 +552,7 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
             case HDL_ATTR_SIZE:
             case HDL_ATTR_ALIGN:
             case HDL_ATTR_VALUE:
+            case HDL_ATTR_SPRITE:
             {
                 // Should be single 8-bit integer or binding
                 if(count > 1 || (attrType != HDL_TYPE_I8 && attrType != HDL_TYPE_BIND)) {
@@ -712,6 +720,11 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
                 case HDL_ATTR_VALUE:
                 {
                     el->attrs.value = tmpVal;
+                    break;
+                }
+                case HDL_ATTR_SPRITE:
+                {
+                    el->attrs.sprite = tmpVal;
                     break;
                 }
 
