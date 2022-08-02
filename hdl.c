@@ -221,6 +221,9 @@ int _hdl_handleBoundAttrs (struct HDL_Interface *interface, struct HDL_Element *
             case HDL_ATTR_DISABLED:
                 element->attrs.disabled = *(uint8_t*)HDL_GetBinding(interface, battr->bind.value);
                 break;
+            case HDL_ATTR_VALUE:
+                element->attrs.value = *(uint8_t*)HDL_GetBinding(interface, battr->bind.value);
+                break;
         }
     }
     return 0;
@@ -530,6 +533,7 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
             case HDL_ATTR_FLEX_DIR:
             case HDL_ATTR_SIZE:
             case HDL_ATTR_ALIGN:
+            case HDL_ATTR_VALUE:
             {
                 // Should be single 8-bit integer or binding
                 if(count > 1 || (attrType != HDL_TYPE_I8 && attrType != HDL_TYPE_BIND)) {
@@ -694,6 +698,11 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
                     el->attrs.size = tmpVal;
                     break;
                 }
+                case HDL_ATTR_VALUE:
+                {
+                    el->attrs.value = tmpVal;
+                    break;
+                }
 
             }
         }
@@ -727,6 +736,15 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
     for(int i = 0; i < el->child_count; i++) {
         el->children[i] = (uint8_t)(*elementIndex);
         int err = _hdl_buildElement(interface, el, elementIndex, data, pc);
+        if(el->tag == HDL_TAG_SWITCH) {
+            // Set disabled value according to element's value
+            if(el->attrs.value == i) {
+                interface->elements[el->children[i]].attrs.disabled = 0;
+            }
+            else {
+                interface->elements[el->children[i]].attrs.disabled = 1;
+            }
+        }
         if(err) {
 
             return HDL_ERR_PARSE;

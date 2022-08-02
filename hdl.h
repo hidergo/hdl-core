@@ -32,7 +32,7 @@
 
 // Tagnames
 #define HDL_TAG_BOX         0
-#define HDL_TAG_TEXT        1
+#define HDL_TAG_SWITCH      1
 
 enum HDL_Type {
     HDL_TYPE_NULL       = 0,
@@ -62,7 +62,8 @@ enum HDL_AttrIndex {
     HDL_ATTR_PADDING    = 8, // Padding
     HDL_ATTR_ALIGN      = 9, // Content alignment
     HDL_ATTR_SIZE       = 10, // Bitmap size (+ font size)
-    HDL_ATTR_DISABLED   = 11  // Disabled
+    HDL_ATTR_DISABLED   = 11, // Disabled
+    HDL_ATTR_VALUE      = 12, // Value
 };
 
 
@@ -135,6 +136,9 @@ struct HDL_Attrs {
     uint8_t align;
     // Size
     uint8_t size;
+
+    // Value - TODO: should be any type
+    uint8_t value;
 };
 #endif
 
