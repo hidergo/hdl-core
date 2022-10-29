@@ -423,8 +423,8 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
 
             for(int y = 0; y < bmp->sprite_height; y++) {
                 for(int x = 0; x < bmp->sprite_width; x++) {
-                    uint8_t bmpData = bmp->data[(y + start_y) * pad_width + (x + start_x) / 8] & (1 << (7 - ((x + start_y) % 8)));
-                    if(bmpData) {
+                    uint8_t bmpData = bmp->data[(y + start_y) * pad_width + (x + start_x) / 8] & (1 << (7 - ((x + start_x) % 8)));
+                    if(!bmpData) {
                         for(int sx = 0; sx < element->attrs.size; sx++) {
                             for(int sy = 0; sy < element->attrs.size; sy++) {
                                 interface->f_pixel(aligned_x + (x * element->attrs.size) + sx, aligned_y + (y * element->attrs.size) + sy);
