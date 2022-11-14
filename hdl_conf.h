@@ -17,4 +17,11 @@
 // Max count of bound attributes
 #define HDL_CONF_MAX_ATTR_BINDINGS  8
 
+// Maximum preloaded image count
+#define HDL_CONF_MAX_PRELOADED_IMAGES 4
+
+// Maximum widget count
+#define HDL_CONF_MAX_WIDGETS 16
+
+
 #endif

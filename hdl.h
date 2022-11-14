@@ -58,13 +58,14 @@ enum HDL_AttrIndex {
     HDL_ATTR_FLEX       = 4, // Flex 
     HDL_ATTR_FLEX_DIR   = 5, // Flex dir
     HDL_ATTR_BIND       = 6, // Bindings
-    HDL_ATTR_IMG        = 7, // Bitmap image
+    HDL_ATTR_IMG        = 7, // Bitmap image. If this is >= 0x8000, use local bitmaps 
     HDL_ATTR_PADDING    = 8, // Padding
     HDL_ATTR_ALIGN      = 9, // Content alignment
     HDL_ATTR_SIZE       = 10, // Bitmap size (+ font size)
     HDL_ATTR_DISABLED   = 11, // Disabled
     HDL_ATTR_VALUE      = 12, // Value
     HDL_ATTR_SPRITE     = 13, // Sprite index
+    HDL_ATTR_WIDGET     = 14, // Widget
 };
 
 
@@ -129,7 +130,7 @@ struct HDL_Attrs {
     // Flex direction
     uint8_t flexDir;
     // Image index
-    uint8_t image;
+    uint16_t image;
 
     // Padding
     int16_t padding_x;
@@ -145,6 +146,9 @@ struct HDL_Attrs {
 
     // Sprite index
     uint8_t sprite;
+
+    // Widget index
+    uint16_t widget;
 };
 #endif
 
@@ -207,6 +211,13 @@ struct HDL_Bounds {
     uint16_t h;
 };
 
+struct HDL_Interface;
+
+struct HDL_Widget {
+    uint16_t id;
+    void (*widget)(struct HDL_Interface*, const struct HDL_Element*)
+};
+
 // HDL display interfaces
 struct HDL_Interface {
     // Width of the screen
@@ -229,8 +240,16 @@ struct HDL_Interface {
 
     void *bindings[HDL_CONF_MAX_BINDINGS];
 
+    // Bitmaps integrated in .hdl
     struct HDL_Bitmap *bitmaps;
     uint16_t bitmapCount;
+
+    // Bitmaps preloaded to HDL_Interface
+    struct HDL_Bitmap *bitmaps_pl;
+    uint16_t bitmapCount_pl;
+
+    struct HDL_Widget widgets[HDL_CONF_MAX_WIDGETS];
+    uint16_t widgetCount;
 
     // Text width on size 1 font
     uint8_t textWidth;
@@ -277,5 +296,11 @@ int HDL_SetBinding (struct HDL_Interface *interface, const char *key, uint8_t in
 
 // Get a binding
 void *HDL_GetBinding (struct HDL_Interface *interface, uint8_t index);
+
+// Preload image
+int HDL_PreloadBitmap (struct HDL_Interface *interface, uint16_t id, uint8_t *data, int len);
+
+// Add widget
+int HDL_AddWidget (struct HDL_Interface *interface, uint16_t id, void (*render)(struct HDL_Interface*, const struct HDL_Element*));
 
 #endif
