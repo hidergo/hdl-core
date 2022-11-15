@@ -44,7 +44,6 @@ enum HDL_Type {
     HDL_TYPE_I32        = 6,
     HDL_TYPE_IMG        = 7,
     HDL_TYPE_BIND       = 8,
-    HDL_TYPE_WIDGET     = 9,
 
     // Tell's how many types have been defined
     HDL_TYPE_COUNT

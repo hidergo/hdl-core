@@ -37,7 +37,6 @@ const uint8_t TYPE_SIZES[] = {
     4, /* HDL_TYPE_I32 */
     2, /* HDL_TYPE_IMG */
     1, /* HDL_TYPE_BIND */
-    2, /* HDL_TYPE_WIDGET */
 };
 
 struct HDL_Bitmap *_hdl_getBitmap (struct HDL_Interface *interface, uint16_t id);
