@@ -40,6 +40,8 @@ const uint8_t TYPE_SIZES[] = {
     2, /* HDL_TYPE_WIDGET */
 };
 
+struct HDL_Bitmap *_hdl_getBitmap (struct HDL_Interface *interface, uint16_t id);
+
 struct HDL_Interface HDL_CreateInterface (uint16_t width, uint16_t height, enum HDL_ColorSpace colorSpace, int features) {
     struct HDL_Interface interface;
     // Zero interface values
@@ -348,9 +350,10 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
         contH *= (interface->textHeight + 1) * element->attrs.size;
     }
     if(element->attrs.image != 0xFFFF) {
-        if(((element->attrs.image & 0x8000) ? (interface->bitmapCount_pl - 0x8000) : interface->bitmapCount) > element->attrs.image) {
-            // Use preloaded bitmaps if image MSb is high
-            struct HDL_Bitmap *bmp = (element->attrs.image & 0x8000) ? &interface->bitmaps_pl[element->attrs.image - 0x8000] : &interface->bitmaps[element->attrs.image];
+        
+        struct HDL_Bitmap *bmp = _hdl_getBitmap(interface, element->attrs.image);
+
+        if(bmp != NULL) {
             // Get image size
             uint16_t imgWidth = bmp->sprite_width * element->attrs.size;
             uint16_t imgHeight = bmp->sprite_height * element->attrs.size;
@@ -418,8 +421,9 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
         }
     }
     if(interface->f_pixel != NULL && element->attrs.image != 0xFFFF) {
-        if(((element->attrs.image & 0x8000) ? (interface->bitmapCount_pl - 0x8000) : interface->bitmapCount) > element->attrs.image) {
-            struct HDL_Bitmap *bmp = (element->attrs.image & 0x8000) ? &interface->bitmaps_pl[element->attrs.image - 0x8000] : &interface->bitmaps[element->attrs.image];
+            
+        struct HDL_Bitmap *bmp = _hdl_getBitmap(interface, element->attrs.image);
+        if(bmp != NULL) {
             int pad_width = (bmp->width + 7) / 8;
             uint16_t sprite_xp = bmp->sprite_width * element->attrs.sprite;
             uint16_t start_x = sprite_xp % bmp->width;
@@ -794,6 +798,8 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
 
 int _hdl_buildBitmap (struct HDL_Interface *interface, struct HDL_Bitmap *bmp, uint8_t *data, int *pc) {
 
+    bmp->id = *(uint16_t*)&data[*pc];
+    (*pc) += 2;
     bmp->size = *(uint16_t*)&data[*pc];
     (*pc) += 2;
     bmp->width = *(uint16_t*)&data[*pc];
@@ -821,12 +827,14 @@ int HDL_PreloadBitmap (struct HDL_Interface *interface, uint16_t id, uint8_t *da
         return HDL_ERR_PARSE;
     }
 
-    if(id & ~0x8000 >= HDL_CONF_MAX_PRELOADED_IMAGES) {
+    if(interface->bitmapCount_pl >= HDL_CONF_MAX_PRELOADED_IMAGES) {
         return HDL_ERR_MEMORY;
     }
 
-    bmp = &interface->bitmaps_pl[id & ~0x8000];
+    bmp = &interface->bitmaps_pl[interface->bitmapCount_pl];
 
+    bmp->id = *(uint16_t*)&data[pc];
+    pc += 2;
     bmp->size = *(uint16_t*)&data[pc];
     pc += 2;
     bmp->width = *(uint16_t*)&data[pc];
@@ -858,6 +866,24 @@ int HDL_AddWidget (struct HDL_Interface *interface, uint16_t id, void (*render)(
     widget->widget = render;
 
     return 0;
+}
+
+// Returns the bitmap. If not found returns NULL
+struct HDL_Bitmap *_hdl_getBitmap (struct HDL_Interface *interface, uint16_t id) {
+    // Bitmaps from files
+    for(int i = 0; i < interface->bitmapCount; i++) {
+        if(interface->bitmaps[i].id == id) {
+            return &interface->bitmaps[i];
+        }
+    }
+    // Preloaded bitmaps
+    for(int i = 0; i < interface->bitmapCount_pl; i++) {
+        if(interface->bitmaps_pl[i].id == id) {
+            return &interface->bitmaps_pl[i];
+        }
+    }
+    // Not found
+    return NULL;
 }
 
 int HDL_Build (struct HDL_Interface *interface, uint8_t *data, uint32_t len) {
