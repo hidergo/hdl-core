@@ -445,7 +445,7 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
     if(element->attrs.widget != 0xFFFF) {
         for(int i = 0; i < HDL_CONF_MAX_WIDGETS; i++) {
             if(interface->widgets[i].id == element->attrs.widget) {
-                interface->widgets[i].widget(interface, (const struct HDDL_Element*)element);
+                interface->widgets[i].widget(interface, (const struct HDL_Element*)element);
                 break;
             }
         }
