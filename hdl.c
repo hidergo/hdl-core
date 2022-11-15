@@ -461,7 +461,7 @@ void HDL_InitElement (struct HDL_Element *element) {
     memset(element, 0, sizeof(struct HDL_Element));
     element->attrs.flex = 1;
     element->attrs.flexDir = HDL_FLEX_ROW;
-    element->attrs.image = 0xFF;
+    element->attrs.image = 0xFFFF;
     element->attrs.size = 1;
     
     // Set children to 0xFF
