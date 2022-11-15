@@ -216,7 +216,7 @@ struct HDL_Interface;
 
 struct HDL_Widget {
     uint16_t id;
-    void (*widget)(struct HDL_Interface*, const struct HDL_Element*)
+    void (*widget)(struct HDL_Interface*, const struct HDL_Element*);
 };
 
 // HDL display interfaces
