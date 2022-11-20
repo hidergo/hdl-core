@@ -906,7 +906,7 @@ int HDL_Build (struct HDL_Interface *interface, uint8_t *data, uint32_t len) {
 
     // Allocate preloaded
     interface->bitmapCount_pl = 0;
-    interface->bitmaps_pl = (struct HDL_Bitmap*)HMALLOC(sizeof(struct HDL_Bitmap) * interface->bitmapCount_pl);
+    interface->bitmaps_pl = (struct HDL_Bitmap*)HMALLOC(sizeof(struct HDL_Bitmap) * HDL_CONF_MAX_PRELOADED_IMAGES);
 
     if(interface->bitmaps_pl == NULL)
         return HDL_ERR_MEMORY;
