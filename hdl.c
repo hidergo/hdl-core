@@ -588,7 +588,7 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
             case HDL_ATTR_IMG:
             {
                 // Should be single u16
-                if(count > 1 || attrType != HDL_TYPE_IMG) {
+                if(count > 1 || (attrType != HDL_TYPE_IMG || attrType != HDL_TYPE_I16)) {
                     // Incorrect value, ignored
                     typeFail = 1;
                 }
@@ -854,8 +854,7 @@ int HDL_PreloadBitmap (struct HDL_Interface *interface, uint16_t id, uint8_t *da
     bmp->colorMode = data[pc];
     pc += 1;
 
-    bmp->data = HMALLOC(bmp->size);
-    memcpy(bmp->data, &data[pc], bmp->size);
+    bmp->data = &data[pc];
 
     interface->bitmapCount_pl++;
 
