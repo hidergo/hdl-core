@@ -55,6 +55,13 @@ struct HDL_Interface HDL_CreateInterface (uint16_t width, uint16_t height, enum 
     interface.textWidth = 8;
     interface.textHeight = 8;
 
+    // Preloaded images
+    interface.bitmapCount_pl = 0;
+
+    for(int i = 0; i < HDL_CONF_MAX_PRELOADED_IMAGES; i++) {
+        interface.bitmaps_pl[i].id = 0xFFFF;
+    }
+
     return interface;
 }
 
@@ -904,9 +911,6 @@ int HDL_Build (struct HDL_Interface *interface, uint8_t *data, uint32_t len) {
     if(interface->bitmaps == NULL)
         return HDL_ERR_MEMORY;
 
-    // Allocate preloaded
-    interface->bitmapCount_pl = 0;
-    interface->bitmaps_pl = (struct HDL_Bitmap*)HMALLOC(sizeof(struct HDL_Bitmap) * HDL_CONF_MAX_PRELOADED_IMAGES);
 
     if(interface->bitmaps_pl == NULL)
         return HDL_ERR_MEMORY;

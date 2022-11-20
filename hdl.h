@@ -246,7 +246,7 @@ struct HDL_Interface {
     uint16_t bitmapCount;
 
     // Bitmaps preloaded to HDL_Interface
-    struct HDL_Bitmap *bitmaps_pl;
+    struct HDL_Bitmap bitmaps_pl[HDL_CONF_MAX_PRELOADED_IMAGES];
     uint16_t bitmapCount_pl;
 
     struct HDL_Widget widgets[HDL_CONF_MAX_WIDGETS];
