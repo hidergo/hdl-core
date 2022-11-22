@@ -588,7 +588,7 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
             case HDL_ATTR_IMG:
             {
                 // Should be single u16
-                if(count > 1 || (attrType != HDL_TYPE_IMG || attrType != HDL_TYPE_I16)) {
+                if(count > 1 || (attrType != HDL_TYPE_IMG && attrType != HDL_TYPE_I16)) {
                     // Incorrect value, ignored
                     typeFail = 1;
                 }
@@ -754,6 +754,9 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
 
             }
         }
+        else {
+            printf("TYPEFAIL: %i = %i at %X\n", attrKey, attrType, (*pc));
+        }
 
         // Increment pc
         if(attrType < sizeof(TYPE_SIZES)) {
@@ -839,7 +842,7 @@ int HDL_PreloadBitmap (struct HDL_Interface *interface, uint16_t id, uint8_t *da
 
     bmp = &interface->bitmaps_pl[interface->bitmapCount_pl];
 
-    bmp->id = *(uint16_t*)&data[pc];
+    bmp->id = id;
     pc += 2;
     bmp->size = *(uint16_t*)&data[pc];
     pc += 2;
