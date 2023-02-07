@@ -572,7 +572,7 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
         enum HDL_Type attrType = (enum HDL_Type)data[(*pc)++];
         uint8_t count = data[(*pc)++];
 
-        if(attrType == HDL_TYPE_BIND) {
+        if(attrType == HDL_TYPE_BIND && attrKey != HDL_ATTR_BIND) {
             // Bound attribute is always uint8_t
             el->bound_attrs[el->boundAttrCount].key = attrKey;
             el->bound_attrs[el->boundAttrCount].count = count;
@@ -651,7 +651,7 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
             // Integers (8bit int array)
             case HDL_ATTR_BIND:
             {
-                if(attrType != HDL_TYPE_I8) {
+                if(attrType != HDL_TYPE_I8 && attrType != HDL_TYPE_BIND) {
                     // Incorrect value, ignored
                     typeFail = 1;
                 }
