@@ -332,31 +332,55 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
     */
 
     if(element->attrs.border > 0) {
+        uint8_t pad_x = 0;
+        uint8_t pad_y = 0;
+
+        if(element->parent != NULL) {
+            pad_x = element->parent->attrs.padding_x;
+            pad_y = element->parent->attrs.padding_y;
+        }
+
+        uint8_t rad_half = element->attrs.radius/2;
+
+        int16_t x1 = element->attrs.x + pad_x/2;
+        int16_t x2 = element->attrs.x + element->attrs.width - pad_x/2;
+        int16_t y1 = element->attrs.y + pad_y/2;
+        int16_t y2 = element->attrs.y + element->attrs.height - pad_y/2;
+
+        // Set strokeWidth
+        uint8_t strokeWidth_old = interface->strokeWidth;
+        interface->strokeWidth = element->attrs.border;
+
         // Border
         // Left
         interface->f_vline(
-            element->attrs.x - element->attrs.padding_x, 
-            element->attrs.y - element->attrs.padding_y + element->attrs.radius,
-            element->attrs.height + element->attrs.padding_y - element->attrs.radius
+            x1, 
+            y1 + rad_half,
+            element->attrs.height - pad_y - element->attrs.radius
         );
         // Right
         interface->f_vline(
-            element->attrs.x + element->attrs.width + element->attrs.padding_x, 
-            element->attrs.y - element->attrs.padding_y + element->attrs.radius,
-            element->attrs.height + element->attrs.padding_y - element->attrs.radius
+            x2, 
+            y1 + rad_half,
+            element->attrs.height - pad_y - element->attrs.radius
         );
         // Top
         interface->f_hline(
-            element->attrs.x - element->attrs.padding_x + element->attrs.radius,
-            element->attrs.y - element->attrs.padding_y,
-            element->attrs.width + element->attrs.padding_x - element->attrs.radius
+            x1 + rad_half,
+            y1,
+            element->attrs.width - pad_x - element->attrs.radius
         );
         // Bottom
         interface->f_hline(
-            element->attrs.x - element->attrs.padding_x + element->attrs.radius,
-            element->attrs.y + element->attrs.height + element->attrs.padding_y,
-            element->attrs.width + element->attrs.padding_x - element->attrs.radius
+            x1 + rad_half,
+            y2,
+            element->attrs.width - pad_x - element->attrs.radius
         );
+        // Corners
+        if(element->attrs.radius) {
+            // TODO:
+        }
+        interface->strokeWidth = strokeWidth_old;
     }
 
     // Set alignment point

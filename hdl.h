@@ -263,6 +263,9 @@ struct HDL_Interface {
     // Text height on size 1 font
     uint8_t textHeight;
 
+    // Width of the stroke. Can be implemented for hline/vline interfaces
+    uint8_t strokeWidth;
+
     // Display driver interfaces
 
     // Clear screen
