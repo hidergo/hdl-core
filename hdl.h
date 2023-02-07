@@ -66,6 +66,8 @@ enum HDL_AttrIndex {
     HDL_ATTR_VALUE      = 12, // Value
     HDL_ATTR_SPRITE     = 13, // Sprite index
     HDL_ATTR_WIDGET     = 14, // Widget
+    HDL_ATTR_BORDER     = 15, // Border
+    HDL_ATTR_RADIUS     = 16, // Radius
 };
 
 
@@ -150,6 +152,10 @@ struct HDL_Attrs {
 
     // Widget index
     uint16_t widget;
+    // Border
+    uint8_t border;
+    // Radius
+    uint8_t radius;
 };
 #endif
 

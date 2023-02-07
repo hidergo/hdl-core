@@ -331,6 +331,34 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
     interface->f_vline(element->x + element->width, element->y, element->height);
     */
 
+    if(element->attrs.border > 0) {
+        // Border
+        // Left
+        interface->f_vline(
+            element->attrs.x - element->attrs.padding_x, 
+            element->attrs.y - element->attrs.padding_y + element->attrs.radius,
+            element->attrs.height + element->attrs.padding_y - element->attrs.radius
+        );
+        // Right
+        interface->f_vline(
+            element->attrs.x + element->attrs.width + element->attrs.padding_x, 
+            element->attrs.y - element->attrs.padding_y + element->attrs.radius,
+            element->attrs.height + element->attrs.padding_y - element->attrs.radius
+        );
+        // Top
+        interface->f_hline(
+            element->attrs.x - element->attrs.padding_x + element->attrs.radius,
+            element->attrs.y - element->attrs.padding_y,
+            element->attrs.width + element->attrs.padding_x - element->attrs.radius
+        );
+        // Bottom
+        interface->f_hline(
+            element->attrs.x - element->attrs.padding_x + element->attrs.radius,
+            element->attrs.y + element->attrs.height + element->attrs.padding_y,
+            element->attrs.width + element->attrs.padding_x - element->attrs.radius
+        );
+    }
+
     // Set alignment point
     int16_t align_x = 0;
     int16_t align_y = 0;
@@ -457,6 +485,7 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
             }
         }
     }
+
     return flags;
 }
 
@@ -575,6 +604,8 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
             case HDL_ATTR_SIZE:
             case HDL_ATTR_ALIGN:
             case HDL_ATTR_VALUE:
+            case HDL_ATTR_BORDER:
+            case HDL_ATTR_RADIUS:
             case HDL_ATTR_SPRITE:
             {
                 // Should be single 8-bit integer or binding
@@ -663,35 +694,23 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
         if(!typeFail) {
             switch(attrKey) {
                 case HDL_ATTR_X:
-                {
                     el->attrs.x = tmpVal;
                     break;
-                }
                 case HDL_ATTR_Y:
-                {
                     el->attrs.y = tmpVal;
                     break;
-                }
                 case HDL_ATTR_WIDTH:
-                {
                     el->attrs.width = tmpVal;
                     break;
-                }
                 case HDL_ATTR_HEIGHT:
-                {
                     el->attrs.height = tmpVal;
                     break;
-                }
                 case HDL_ATTR_FLEX:
-                {
                     el->attrs.flex = tmpVal;
                     break;
-                }
                 case HDL_ATTR_FLEX_DIR:
-                {
                     el->attrs.flexDir = tmpVal;
                     break;
-                }
                 case HDL_ATTR_BIND:
                 {
                     el->bindings = HMALLOC(sizeof(uint8_t) * count);
@@ -702,10 +721,8 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
                     break;
                 }
                 case HDL_ATTR_IMG:
-                {
                     el->attrs.image = tmpVal;
                     break;
-                }
                 case HDL_ATTR_PADDING:
                 {
                     if(count > 1) {
@@ -727,30 +744,26 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
                     break;
                 }
                 case HDL_ATTR_ALIGN:
-                {
                     el->attrs.align = tmpVal;
                     break;
-                }
                 case HDL_ATTR_DISABLED:
-                {
                     el->attrs.disabled = tmpVal;
                     break;
-                }
                 case HDL_ATTR_SIZE:
-                {
                     el->attrs.size = tmpVal;
                     break;
-                }
                 case HDL_ATTR_VALUE:
-                {
                     el->attrs.value = tmpVal;
                     break;
-                }
                 case HDL_ATTR_SPRITE:
-                {
                     el->attrs.sprite = tmpVal;
                     break;
-                }
+                case HDL_ATTR_BORDER:
+                    el->attrs.border = tmpVal;
+                    break;
+                case HDL_ATTR_RADIUS:
+                    el->attrs.radius = tmpVal;
+                    break;
 
             }
         }
