@@ -537,7 +537,7 @@ int HDL_SetBinding (struct HDL_Interface *interface, const char *key, uint8_t in
 
     if(index >= HDL_CONF_MAX_BINDINGS) {
         // Binding out of bounds
-        printf("Error: Binding '%s' out of bounds\r\n", key);
+        //printf("Error: Binding '%s' out of bounds\r\n", key);
         return 1;
     }
 
@@ -552,7 +552,7 @@ void *HDL_GetBinding (struct HDL_Interface *interface, uint8_t index) {
 
     if(index >= HDL_CONF_MAX_BINDINGS) {
         // Binding out of bounds
-        printf("Error: Binding out of bounds\r\n");
+        //printf("Error: Binding out of bounds\r\n");
         return NULL;
     }
 
@@ -792,7 +792,7 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
             }
         }
         else {
-            printf("TYPEFAIL: %i = %i at %X\n", attrKey, attrType, (*pc));
+            //printf("TYPEFAIL: %i = %i at %X\n", attrKey, attrType, (*pc));
         }
 
         // Increment pc
