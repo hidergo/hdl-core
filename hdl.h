@@ -280,12 +280,13 @@ struct HDL_Interface {
     void (*f_text)(int16_t x, int16_t y, const char *text, uint8_t fontSize);
     // Set pixel
     void (*f_pixel)(int16_t x, int16_t y);
+    // Draw arc
+    void (*f_arc)(int16_t x, int16_t y, int16_t radius, uint16_t a1, uint16_t a2);
 
     // Render the whole screen
     void (*f_render)();
     // Render part of the screen, useful for e-paper displays
     void (*f_renderPart)(int16_t x, int16_t y, uint16_t w, uint16_t h);
-
 
 };
 

@@ -340,7 +340,7 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
             pad_y = element->parent->attrs.padding_y;
         }
 
-        uint8_t rad_half = element->attrs.radius/2;
+        uint8_t diameter = element->attrs.radius * 2;
 
         int16_t x1 = element->attrs.x + pad_x/2;
         int16_t x2 = element->attrs.x + element->attrs.width - pad_x/2;
@@ -355,30 +355,36 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
         // Left
         interface->f_vline(
             x1, 
-            y1 + rad_half,
-            element->attrs.height - pad_y - element->attrs.radius
+            y1 + element->attrs.radius,
+            element->attrs.height - pad_y - diameter
         );
         // Right
         interface->f_vline(
             x2, 
-            y1 + rad_half,
-            element->attrs.height - pad_y - element->attrs.radius
+            y1 + element->attrs.radius,
+            element->attrs.height - pad_y - diameter
         );
         // Top
         interface->f_hline(
-            x1 + rad_half,
+            x1 + element->attrs.radius,
             y1,
-            element->attrs.width - pad_x - element->attrs.radius
+            element->attrs.width - pad_x - diameter
         );
         // Bottom
         interface->f_hline(
-            x1 + rad_half,
+            x1 + element->attrs.radius,
             y2,
-            element->attrs.width - pad_x - element->attrs.radius
+            element->attrs.width - pad_x - diameter
         );
         // Corners
         if(element->attrs.radius) {
-            // TODO:
+            if(interface->f_arc) {
+                interface->f_arc(x1 + element->attrs.radius, y1 + element->attrs.radius, element->attrs.radius, 180, 270);
+                interface->f_arc(x2 - element->attrs.radius, y1 + element->attrs.radius, element->attrs.radius, 270, 360);
+                interface->f_arc(x2 - element->attrs.radius, y2 - element->attrs.radius, element->attrs.radius, 0, 90);
+                interface->f_arc(x1 + element->attrs.radius, y2 - element->attrs.radius, element->attrs.radius, 90, 180);
+
+            }
         }
         interface->strokeWidth = strokeWidth_old;
     }
