@@ -298,7 +298,7 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
         child->attrs.x = curFlexX;
         child->attrs.y = curFlexY;
 
-        if(element->attrs.flexDir == HDL_FLEX_ROW) {
+        if(element->attrs.flexDir == HDL_FLEX_COLUMN) {
             int16_t addF = (uint16_t)ceilf((float)child->attrs.flex / (float)totalFlex * element->attrs.width);
             // Set child width
             child->attrs.width = addF;
@@ -307,7 +307,7 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
 
             curFlexX += addF;
         }
-        else if(element->attrs.flexDir == HDL_FLEX_COLUMN) {
+        else if(element->attrs.flexDir == HDL_FLEX_ROW) {
             int16_t addF = (uint16_t)ceilf((float)child->attrs.flex / (float)totalFlex * element->attrs.height);
             // Set child height
             child->attrs.height = addF;
