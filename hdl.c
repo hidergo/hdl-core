@@ -331,14 +331,14 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
     interface->f_vline(element->x + element->width, element->y, element->height);
     */
 
-    if(element->attrs.border > 0) {
-        uint8_t pad_x = 0;
-        uint8_t pad_y = 0;
+    uint8_t pad_x = 0;
+    uint8_t pad_y = 0;
 
-        if(element->parent != NULL) {
-            pad_x = element->parent->attrs.padding_x;
-            pad_y = element->parent->attrs.padding_y;
-        }
+    if(element->parent != NULL) {
+        pad_x = element->parent->attrs.padding_x;
+        pad_y = element->parent->attrs.padding_y;
+    }
+    if(element->attrs.border > 0) {
 
         uint8_t diameter = element->attrs.radius * 2;
 
@@ -436,13 +436,13 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
         case HDL_ALIGN_Y_TOP:
         {
             // Top
-            align_y = 0;
+            align_y = pad_y/2;
             break;
         }
         case HDL_ALIGN_Y_BOTTOM:
         {
             // Bottom
-            align_y = element->attrs.height - contH;
+            align_y = element->attrs.height - contH - pad_y/2;
             break;
         }
         default:
@@ -456,12 +456,12 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
     switch(hzAlign) {
         case HDL_ALIGN_X_LEFT:
         {
-            align_x = 0;
+            align_x = pad_x/2;
             break;
         }
         case HDL_ALIGN_X_RIGHT:
         {
-            align_x = element->attrs.width - contW;
+            align_x = element->attrs.width - contW - pad_x/2;
             break;
         }
         default:
