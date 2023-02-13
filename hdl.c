@@ -356,33 +356,33 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
         interface->f_vline(
             x1, 
             y1 + element->attrs.radius,
-            element->attrs.height - pad_y - diameter
+            element->attrs.height - pad_y - diameter + 1
         );
         // Right
         interface->f_vline(
             x2, 
             y1 + element->attrs.radius,
-            element->attrs.height - pad_y - diameter
+            element->attrs.height - pad_y - diameter + 1
         );
         // Top
         interface->f_hline(
             x1 + element->attrs.radius,
             y1,
-            element->attrs.width - pad_x - diameter
+            element->attrs.width - pad_x - diameter + 1
         );
         // Bottom
         interface->f_hline(
             x1 + element->attrs.radius,
             y2,
-            element->attrs.width - pad_x - diameter
+            element->attrs.width - pad_x - diameter + 1
         );
         // Corners
         if(element->attrs.radius) {
             if(interface->f_arc) {
                 interface->f_arc(x1 + element->attrs.radius, y1 + element->attrs.radius, element->attrs.radius, 180, 270);
-                interface->f_arc(x2 - element->attrs.radius, y1 + element->attrs.radius, element->attrs.radius, 270, 360);
-                interface->f_arc(x2 - element->attrs.radius, y2 - element->attrs.radius, element->attrs.radius, 0, 90);
-                interface->f_arc(x1 + element->attrs.radius, y2 - element->attrs.radius, element->attrs.radius, 90, 180);
+                interface->f_arc(x2 - element->attrs.radius + 1, y1 + element->attrs.radius, element->attrs.radius, 270, 360);
+                interface->f_arc(x2 - element->attrs.radius + 1, y2 - element->attrs.radius + 1, element->attrs.radius, 0, 90);
+                interface->f_arc(x1 + element->attrs.radius, y2 - element->attrs.radius + 1, element->attrs.radius, 90, 180);
 
             }
         }
