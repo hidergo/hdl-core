@@ -36,7 +36,7 @@ const uint8_t TYPE_SIZES[] = {
     2, /* HDL_TYPE_I16 */
     4, /* HDL_TYPE_I32 */
     2, /* HDL_TYPE_IMG */
-    1, /* HDL_TYPE_BIND */
+    2, /* HDL_TYPE_BIND */
 };
 
 struct HDL_Bitmap *_hdl_getBitmap (struct HDL_Interface *interface, uint16_t id);
@@ -60,6 +60,11 @@ struct HDL_Interface HDL_CreateInterface (uint16_t width, uint16_t height, enum 
 
     for(int i = 0; i < HDL_CONF_MAX_PRELOADED_IMAGES; i++) {
         interface.bitmaps_pl[i].id = 0xFFFF;
+    }
+
+    // Reset bindings
+    for(int i = 0; i < HDL_CONF_MAX_BINDINGS; i++) {
+        interface.bindings[i].id = 0xFFFF;
     }
 
     return interface;
@@ -129,6 +134,7 @@ int _hdl_sprintf_bindings (char *buffer, struct HDL_Interface *interface, struct
                 savedChar = element->content[i + 1];
                 element->content[i + 1] = 0;
                 int lenw = 0;
+                struct HDL_Binding *binding = HDL_GetBinding(interface, element->bindings[bind_index]);
                 switch(element->content[i]) {
                     case 'd':
                     case 'i':
@@ -138,7 +144,7 @@ int _hdl_sprintf_bindings (char *buffer, struct HDL_Interface *interface, struct
                     case 'X':
                     {
                         // Format INTEGER
-                        lenw = sprintf(start_w, start_r, *(int*)interface->bindings[element->bindings[bind_index]]);
+                        lenw = sprintf(start_w, start_r, *(int*)binding->data);
                         break;
                     }
                     case 'f':
@@ -147,25 +153,25 @@ int _hdl_sprintf_bindings (char *buffer, struct HDL_Interface *interface, struct
                     case 'g':
                     {
                         // Format FLOAT
-                        lenw = sprintf(start_w, start_r, *(float*)interface->bindings[element->bindings[bind_index]]);
+                        lenw = sprintf(start_w, start_r, *(float*)binding->data);
                         break;
                     }
                     case 'p':
                     {
                         // Format POINTER
-                        lenw = sprintf(start_w, start_r, (void*)interface->bindings[element->bindings[bind_index]]);
+                        lenw = sprintf(start_w, start_r, (void*)binding->data);
                         break;
                     }
                     case 'c':
                     {
                         // Format CHARACTER
-                        lenw = sprintf(start_w, start_r, *(char*)interface->bindings[element->bindings[bind_index]]);
+                        lenw = sprintf(start_w, start_r, *(char*)binding->data);
                         break;
                     }
                     case 's':
                     {
                         // Format STRING
-                        lenw = sprintf(start_w, start_r, (char*)interface->bindings[element->bindings[bind_index]]);
+                        lenw = sprintf(start_w, start_r, (char*)binding->data);
                         break;
                     }
                 }
@@ -185,56 +191,57 @@ int _hdl_sprintf_bindings (char *buffer, struct HDL_Interface *interface, struct
 int _hdl_handleBoundAttrs (struct HDL_Interface *interface, struct HDL_Element *element) {
     for(int i = 0; i < element->boundAttrCount; i++) {
         struct HDL_AttrBind *battr = &element->bound_attrs[i];
+        struct HDL_Binding *binding = HDL_GetBinding(interface, battr->bind.value);
         switch(battr->key) {
             case HDL_ATTR_X:
-                element->attrs.x = *(int16_t*)HDL_GetBinding(interface, battr->bind.value);
+                element->attrs.x = *(int16_t*)binding->data;
                 break;
             case HDL_ATTR_Y:
-                element->attrs.y = *(int16_t*)HDL_GetBinding(interface, battr->bind.value);
+                element->attrs.y = *(int16_t*)binding->data;
                 break;
             case HDL_ATTR_WIDTH:
-                element->attrs.width = *(uint16_t*)HDL_GetBinding(interface, battr->bind.value);
+                element->attrs.width = *(uint16_t*)binding->data;
                 break;
             case HDL_ATTR_HEIGHT:
-                element->attrs.height = *(uint16_t*)HDL_GetBinding(interface, battr->bind.value);
+                element->attrs.height = *(uint16_t*)binding->data;
                 break;
             case HDL_ATTR_FLEX:
-                element->attrs.flex = *(uint8_t*)HDL_GetBinding(interface, battr->bind.value);
+                element->attrs.flex = *(uint8_t*)binding->data;
                 break;
             case HDL_ATTR_FLEX_DIR:
-                element->attrs.flexDir = *(uint8_t*)HDL_GetBinding(interface, battr->bind.value);
+                element->attrs.flexDir = *(uint8_t*)binding->data;
                 break;
             case HDL_ATTR_BIND:
                 // Should not be bound
                 return 1;
                 break;
             case HDL_ATTR_IMG:
-                element->attrs.image = *(uint16_t*)HDL_GetBinding(interface, battr->bind.value);
+                element->attrs.image = *(uint16_t*)binding->data;
                 break;
             case HDL_ATTR_PADDING:
                 if(battr->count == 1) {
-                    element->attrs.padding_x = *(int16_t*)HDL_GetBinding(interface, battr->bind.value);
-                    element->attrs.padding_y = *(int16_t*)HDL_GetBinding(interface, battr->bind.value);
+                    element->attrs.padding_x = *(int16_t*)binding->data;
+                    element->attrs.padding_y = *(int16_t*)binding->data;
                 }
                 else {
-                    element->attrs.padding_x = *(int16_t*)HDL_GetBinding(interface, battr->bind.values[0]);
-                    element->attrs.padding_y = *(int16_t*)HDL_GetBinding(interface, battr->bind.values[1]);
+                    element->attrs.padding_x = *(int16_t*)HDL_GetBinding(interface, battr->bind.values[0])->data;
+                    element->attrs.padding_y = *(int16_t*)HDL_GetBinding(interface, battr->bind.values[1])->data;
                 }
                 break;
             case HDL_ATTR_ALIGN:
-                element->attrs.align = *(uint8_t*)HDL_GetBinding(interface, battr->bind.value);
+                element->attrs.align = *(uint8_t*)binding->data;
                 break;
             case HDL_ATTR_SIZE:
-                element->attrs.size = *(uint8_t*)HDL_GetBinding(interface, battr->bind.value);
+                element->attrs.size = *(uint8_t*)binding->data;
                 break;
             case HDL_ATTR_DISABLED:
-                element->attrs.disabled = *(uint8_t*)HDL_GetBinding(interface, battr->bind.value);
+                element->attrs.disabled = *(uint8_t*)binding->data;
                 break;
             case HDL_ATTR_VALUE:
-                element->attrs.value = *(uint8_t*)HDL_GetBinding(interface, battr->bind.value);
+                element->attrs.value = *(uint8_t*)binding->data;
                 break;
             case HDL_ATTR_SPRITE:
-                element->attrs.sprite = *(uint8_t*)HDL_GetBinding(interface, battr->bind.value);
+                element->attrs.sprite = *(uint8_t*)binding->data;
                 break;
         }
     }
@@ -539,30 +546,28 @@ void HDL_InitElement (struct HDL_Element *element) {
 
 }
 
-int HDL_SetBinding (struct HDL_Interface *interface, const char *key, uint8_t index, void *binding) {
+int HDL_SetBinding (struct HDL_Interface *interface, const char *key, uint16_t id, void *binding, enum HDL_Type type) {
 
-    if(index >= HDL_CONF_MAX_BINDINGS) {
-        // Binding out of bounds
-        //printf("Error: Binding '%s' out of bounds\r\n", key);
-        return 1;
+    for(int i = 0; i < HDL_CONF_MAX_BINDINGS; i++) {
+        if(interface->bindings[i].id == 0xFFFF) {
+            interface->bindings[i].id = id;
+            interface->bindings[i].data = binding;
+            interface->bindings[i].type = type;
+            return 0;
+        }
     }
 
-    interface->bindings[index] = binding;
-
-    // TODO: Use key for easier access...
-
-    return 0;
+    return 1;
 }
 
-void *HDL_GetBinding (struct HDL_Interface *interface, uint8_t index) {
+struct HDL_Binding *HDL_GetBinding (struct HDL_Interface *interface, uint16_t id) {
 
-    if(index >= HDL_CONF_MAX_BINDINGS) {
-        // Binding out of bounds
-        //printf("Error: Binding out of bounds\r\n");
-        return NULL;
+    for(int i = 0; i < HDL_CONF_MAX_BINDINGS; i++) {
+        if(interface->bindings[i].id == id) {
+            return &interface->bindings[i];
+        }
     }
-
-    return interface->bindings[index];
+    return NULL;
 }
 
 // Parses a single element
@@ -678,17 +683,9 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
                 }
                 break;
             }
-            // Integers (8bit int array)
-            case HDL_ATTR_BIND:
-            {
-                if(attrType != HDL_TYPE_I8 && attrType != HDL_TYPE_BIND) {
-                    // Incorrect value, ignored
-                    typeFail = 1;
-                }
-                break;
-            }
             // Integers (8/16bit int array)
             case HDL_ATTR_PADDING:
+            case HDL_ATTR_BIND:
             {
                 if((attrType != HDL_TYPE_I8 && attrType != HDL_TYPE_I16 && attrType != HDL_TYPE_BIND)) {
                     // Incorrect value, ignored
@@ -703,13 +700,13 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
         switch(attrType) {
             case HDL_TYPE_BOOL:
             case HDL_TYPE_I8:
-            case HDL_TYPE_BIND:
             {
                 tmpVal = *(int8_t*)&data[*pc];
                 break;
             }
             case HDL_TYPE_IMG:
             case HDL_TYPE_I16:
+            case HDL_TYPE_BIND:
             {
                 tmpVal = *(int16_t*)&data[*pc];
                 break;
@@ -743,10 +740,10 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
                     break;
                 case HDL_ATTR_BIND:
                 {
-                    el->bindings = HMALLOC(sizeof(uint8_t) * count);
+                    el->bindings = HMALLOC(sizeof(uint16_t) * count);
                     el->bind_count = count;
                     for(int x = 0; x < count; x++) {
-                        el->bindings[x] = (uint8_t)((uint8_t*)&data[(*pc)])[x];
+                        el->bindings[x] = (uint16_t)((uint16_t*)&data[(*pc)])[x];
                     }
                     break;
                 }

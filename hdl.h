@@ -177,7 +177,7 @@ struct HDL_Element {
     // Element content
     char *content;
     // Bindings
-    uint8_t *bindings;
+    uint16_t *bindings;
     // Binding count
     uint8_t bind_count;
     // Flags
@@ -225,6 +225,12 @@ struct HDL_Widget {
     void (*widget)(struct HDL_Interface*, const struct HDL_Element*);
 };
 
+struct HDL_Binding {
+    uint16_t id;
+    void *data;
+    enum HDL_Type type;
+};
+
 // HDL display interfaces
 struct HDL_Interface {
     // Width of the screen
@@ -245,7 +251,7 @@ struct HDL_Interface {
     // Element count
     uint16_t elementCount;
 
-    void *bindings[HDL_CONF_MAX_BINDINGS];
+    struct HDL_Binding bindings[HDL_CONF_MAX_BINDINGS];
 
     // Bitmaps integrated in .hdl
     struct HDL_Bitmap *bitmaps;
@@ -303,10 +309,10 @@ int HDL_Update (struct HDL_Interface *interface);
 void HDL_Free (struct HDL_Interface *interface);
 
 // Add a binding
-int HDL_SetBinding (struct HDL_Interface *interface, const char *key, uint8_t index, void *binding);
+int HDL_SetBinding (struct HDL_Interface *interface, const char *key, uint16_t id, void *binding, enum HDL_Type type);
 
 // Get a binding
-void *HDL_GetBinding (struct HDL_Interface *interface, uint8_t index);
+struct HDL_Binding *HDL_GetBinding (struct HDL_Interface *interface, uint16_t id);
 
 // Preload image
 int HDL_PreloadBitmap (struct HDL_Interface *interface, uint16_t id, uint8_t *data, int len);
