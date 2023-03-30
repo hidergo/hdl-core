@@ -54,6 +54,11 @@ struct HDL_Interface HDL_CreateInterface (uint16_t width, uint16_t height, enum 
     // Default text width and height
     interface.textWidth = 8;
     interface.textHeight = 8;
+    // Default update rates
+    // Never force update
+    interface.maxUpdateInterval = 0;
+    // Allow updates only every 30ms
+    interface.minUpdateInterval = 30;
 
     // Preloaded images
     interface.bitmapCount_pl = 0;
@@ -65,6 +70,9 @@ struct HDL_Interface HDL_CreateInterface (uint16_t width, uint16_t height, enum 
     // Reset bindings
     for(int i = 0; i < HDL_CONF_MAX_BINDINGS; i++) {
         interface.bindings[i].id = 0xFFFF;
+        #ifdef HDL_CONF_BIND_COPIES
+        interface._bindings_cpy->id = 0xFFFF;
+        #endif
     }
 
     return interface;
@@ -427,10 +435,10 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
         // Corners
         if(element->attrs.radius) {
             if(interface->f_arc) {
-                interface->f_arc(x1 + element->attrs.radius, y1 + element->attrs.radius, element->attrs.radius, 180, 270);
-                interface->f_arc(x2 - element->attrs.radius + 1, y1 + element->attrs.radius, element->attrs.radius, 270, 360);
+                interface->f_arc(x1 + element->attrs.radius + 1, y1 + element->attrs.radius + 1, element->attrs.radius, 180, 270);
+                interface->f_arc(x2 - element->attrs.radius + 1, y1 + element->attrs.radius + 1, element->attrs.radius, 270, 360);
                 interface->f_arc(x2 - element->attrs.radius + 1, y2 - element->attrs.radius + 1, element->attrs.radius, 0, 90);
-                interface->f_arc(x1 + element->attrs.radius, y2 - element->attrs.radius + 1, element->attrs.radius, 90, 180);
+                interface->f_arc(x1 + element->attrs.radius + 1, y2 - element->attrs.radius + 1, element->attrs.radius, 90, 180);
 
             }
         }
@@ -595,6 +603,11 @@ int HDL_SetBinding (struct HDL_Interface *interface, const char *key, uint16_t i
             interface->bindings[i].id = id;
             interface->bindings[i].data = binding;
             interface->bindings[i].type = type;
+
+            #ifdef HDL_CONF_BIND_COPIES
+            memcpy(&interface->_bindings_cpy[i], &interface->bindings[i], sizeof(struct HDL_Binding));
+            #endif
+
             return 0;
         }
     }
@@ -758,6 +771,11 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
                 tmpVal = *(int32_t*)&data[*pc];
                 break;
             }
+            default:
+            {
+                tmpVal = 0;
+                break;
+            }
         }
 
         if(!typeFail) {
@@ -832,6 +850,9 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
                     break;
                 case HDL_ATTR_RADIUS:
                     el->attrs.radius = tmpVal;
+                    break;
+                case HDL_ATTR_WIDGET:
+                    el->attrs.widget = tmpVal;
                     break;
 
             }
@@ -995,11 +1016,6 @@ int HDL_Build (struct HDL_Interface *interface, uint8_t *data, uint32_t len) {
     if(interface->bitmaps == NULL)
         return HDL_ERR_MEMORY;
 
-
-    if(interface->bitmaps_pl == NULL)
-        return HDL_ERR_MEMORY;
-
-
     // Widgets
     interface->widgetCount = 0;
     for(int i = 0; i < HDL_CONF_MAX_WIDGETS; i++) {
@@ -1031,23 +1047,53 @@ int HDL_Build (struct HDL_Interface *interface, uint8_t *data, uint32_t len) {
     return err;
 }
 
-int HDL_Update (struct HDL_Interface *interface) {
+#ifdef HDL_CONF_BIND_COPIES
+int _hdl_checkBindings (struct HDL_Interface *interface) {
+    int update = 0;
+    for(int i = 0; i < HDL_CONF_MAX_BINDINGS; i++) {
+        if(interface->bindings[i].id != 0xFFFF && interface->bindings[i].id == interface->_bindings_cpy[i].id) {
+            if(memcmp(interface->bindings[i].data, interface->_bindings_cpy[i].data, TYPE_SIZES[interface->bindings[i].type]) != 0) {
+                update = 1;
+                // Do not break here to update other bindings too
+            }
+        }
+    }
+    return update;
+}
+#endif
+
+int HDL_Update (struct HDL_Interface *interface, uint64_t time) {
 
     if(interface->root == NULL)
         return HDL_ERR_NO_ROOT;
 
-    // TODO: clear screen?
-    interface->f_clear(0, 0, interface->width, interface->height);
+    uint32_t delta = (uint32_t)(time - interface->_lastUpdate);
 
-    _hdl_handleElement(interface, interface->root);
+    // Too early
+    if(delta < interface->minUpdateInterval && interface->_updated)
+        return 0;
+    
+    // Force update
+    if((interface->maxUpdateInterval != 0 && delta >= interface->maxUpdateInterval) || !interface->_updated
+#ifdef HDL_CONF_BIND_COPIES
+        || _hdl_checkBindings(interface)
+#endif
+        ) {
+        // TODO: clear screen?
+        interface->f_clear(0, 0, interface->width, interface->height);
 
-    // Use partial refresh rather than full refresh if defined
-    if(interface->f_renderPart != NULL) {
-        // TODO: render only changed parts!
-        interface->f_renderPart(0, 0, interface->width, interface->height);
-    }
-    else {
-        interface->f_render();
+        _hdl_handleElement(interface, interface->root);
+
+        // Use partial refresh rather than full refresh if defined
+        if(interface->f_renderPart != NULL) {
+            // TODO: render only changed parts!
+            interface->f_renderPart(0, 0, interface->width, interface->height);
+        }
+        else {
+            interface->f_render();
+        }
+        interface->_lastUpdate = time;
+        interface->_updated = 1;
     }
 
     return 0;
@@ -1070,4 +1116,12 @@ void HDL_Free (struct HDL_Interface *interface) {
     if(interface->elements != NULL) {
         HFREE(interface->elements);
     }
+}
+
+void HDL_SetUpdateInterval (struct HDL_Interface *interface, uint16_t min, uint16_t max) {
+    if(interface == NULL)
+        return;
+
+    interface->minUpdateInterval = min;
+    interface->maxUpdateInterval = max;
 }

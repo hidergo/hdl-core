@@ -251,7 +251,12 @@ struct HDL_Interface {
     // Element count
     uint16_t elementCount;
 
+    // Bindings
     struct HDL_Binding bindings[HDL_CONF_MAX_BINDINGS];
+    #ifdef HDL_CONF_BIND_COPIES
+    // Copy of bindings for refresh
+    struct HDL_Binding _bindings_cpy[HDL_CONF_MAX_BINDINGS];
+    #endif
 
     // Bitmaps integrated in .hdl
     struct HDL_Bitmap *bitmaps;
@@ -271,6 +276,17 @@ struct HDL_Interface {
 
     // Width of the stroke. Can be implemented for hline/vline interfaces
     uint8_t strokeWidth;
+
+    // Maximum update interval (how long until screen is forced to refresh) in milliseconds. Set to 0 if no limit
+    uint16_t maxUpdateInterval;
+    // Minimum update interval (how long until screen can be refreshed) in milliseconds.
+    uint16_t minUpdateInterval;
+    
+    // Last update
+    uint64_t _lastUpdate;
+
+    // Has the screen been updated
+    uint8_t _updated;
 
     // Display driver interfaces
 
@@ -303,7 +319,7 @@ struct HDL_Interface HDL_CreateInterface (uint16_t width, uint16_t height, enum 
 int HDL_Build (struct HDL_Interface *interface, uint8_t *data, uint32_t len);
 
 // Handle HDL updates
-int HDL_Update (struct HDL_Interface *interface);
+int HDL_Update (struct HDL_Interface *interface, uint64_t time);
 
 // Cleanup
 void HDL_Free (struct HDL_Interface *interface);
@@ -319,5 +335,14 @@ int HDL_PreloadBitmap (struct HDL_Interface *interface, uint16_t id, uint8_t *da
 
 // Add widget
 int HDL_AddWidget (struct HDL_Interface *interface, uint16_t id, void (*render)(struct HDL_Interface*, const struct HDL_Element*));
+
+/**
+ * @brief Sets the interface update interval
+ * 
+ * @param interface HDL interface
+ * @param min How long until screen can be refreshed in milliseconds
+ * @param max How long until screen is forced to refresh in milliseconds
+*/
+void HDL_SetUpdateInterval (struct HDL_Interface *interface, uint16_t min, uint16_t max);
 
 #endif

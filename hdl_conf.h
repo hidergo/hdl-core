@@ -23,5 +23,8 @@
 // Maximum widget count
 #define HDL_CONF_MAX_WIDGETS 16
 
+// Use binding copies for auto refresh
+#define HDL_CONF_BIND_COPIES
+
 
 #endif
