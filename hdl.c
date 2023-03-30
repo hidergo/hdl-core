@@ -1057,7 +1057,7 @@ int _hdl_checkBindings (struct HDL_Interface *interface) {
         if(interface->bindings[i].id != 0xFFFF && interface->bindings[i].id == interface->_bindings_cpy[i].id) {
             if(memcmp(interface->bindings[i].data, interface->_bindings_cpy[i].data, TYPE_SIZES[interface->bindings[i].type]) != 0) {
                 update = 1;
-                memcpy(interface->bindings[i].data, interface->_bindings_cpy[i].data, TYPE_SIZES[interface->bindings[i].type]);
+                memcpy(interface->_bindings_cpy[i].data, interface->bindings[i].data, TYPE_SIZES[interface->bindings[i].type]);
                 // Do not break here to update other bindings too
             }
         }
