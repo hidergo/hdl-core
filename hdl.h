@@ -321,6 +321,9 @@ int HDL_Build (struct HDL_Interface *interface, uint8_t *data, uint32_t len);
 // Handle HDL updates
 int HDL_Update (struct HDL_Interface *interface, uint64_t time);
 
+// Forces an update
+int HDL_ForceUpdate (struct HDL_Interface *interface);
+
 // Cleanup
 void HDL_Free (struct HDL_Interface *interface);
 

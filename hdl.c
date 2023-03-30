@@ -1065,7 +1065,7 @@ int _hdl_checkBindings (struct HDL_Interface *interface) {
 int HDL_Update (struct HDL_Interface *interface, uint64_t time) {
 
     if(interface->root == NULL)
-        return HDL_ERR_NO_ROOT;
+        return 0;
 
     uint32_t delta = (uint32_t)(time - interface->_lastUpdate);
 
@@ -1094,9 +1094,32 @@ int HDL_Update (struct HDL_Interface *interface, uint64_t time) {
         }
         interface->_lastUpdate = time;
         interface->_updated = 1;
+        return 1;
     }
 
     return 0;
+}
+
+int HDL_ForceUpdate (struct HDL_Interface *interface) {
+
+    if(interface->root == NULL)
+        return 0;
+
+    
+    // TODO: clear screen?
+    interface->f_clear(0, 0, interface->width, interface->height);
+
+    _hdl_handleElement(interface, interface->root);
+
+    // Use partial refresh rather than full refresh if defined
+    if(interface->f_renderPart != NULL) {
+        // TODO: render only changed parts!
+        interface->f_renderPart(0, 0, interface->width, interface->height);
+    }
+    else {
+        interface->f_render();
+    }
+    interface->_updated = 1;
 }
 
 void _hdl_freeElement (struct HDL_Element *element) {
