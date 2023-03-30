@@ -605,7 +605,10 @@ int HDL_SetBinding (struct HDL_Interface *interface, const char *key, uint16_t i
             interface->bindings[i].type = type;
 
             #ifdef HDL_CONF_BIND_COPIES
-            memcpy(&interface->_bindings_cpy[i], &interface->bindings[i], sizeof(struct HDL_Binding));
+            interface->_bindings_cpy[i].id = id;
+            interface->_bindings_cpy[i].data = HMALLOC(TYPE_SIZES[type]);
+            memcpy(interface->_bindings_cpy[i].data, binding, TYPE_SIZES[type]);
+            interface->_bindings_cpy[i].type = type;
             #endif
 
             return 0;
@@ -1054,6 +1057,7 @@ int _hdl_checkBindings (struct HDL_Interface *interface) {
         if(interface->bindings[i].id != 0xFFFF && interface->bindings[i].id == interface->_bindings_cpy[i].id) {
             if(memcmp(interface->bindings[i].data, interface->_bindings_cpy[i].data, TYPE_SIZES[interface->bindings[i].type]) != 0) {
                 update = 1;
+                memcpy(interface->bindings[i].data, interface->_bindings_cpy[i].data, TYPE_SIZES[interface->bindings[i].type]);
                 // Do not break here to update other bindings too
             }
         }
@@ -1120,6 +1124,7 @@ int HDL_ForceUpdate (struct HDL_Interface *interface) {
         interface->f_render();
     }
     interface->_updated = 1;
+    return 1;
 }
 
 void _hdl_freeElement (struct HDL_Element *element) {
@@ -1135,6 +1140,12 @@ void HDL_Free (struct HDL_Interface *interface) {
     for(int i = 0; i < interface->elementCount; i++) {
         _hdl_freeElement(&interface->elements[i]);
     }
+#ifdef HDL_CONF_BIND_COPIES
+    for(int i = 0; i < HDL_CONF_MAX_BINDINGS; i++) {
+        if(interface->_bindings_cpy[i].data != NULL)
+            HFREE(interface->_bindings_cpy[i].data);
+    }
+#endif
     // Free elements
     if(interface->elements != NULL) {
         HFREE(interface->elements);
