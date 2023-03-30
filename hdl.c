@@ -120,11 +120,16 @@ int _hdl_sprintf_bindings (char *buffer, struct HDL_Interface *interface, struct
     for(int i = 0; i < len; i++) {
         if(state == 0) {
             if(element->content[i] == '%') {
-                if(i > 1 && element->content[i - 1] == '\\') {
+                if(i >= 1 && element->content[i - 1] == '\\') {
                     // Escaped format, ignore
+                    (*(start_w - 1)) = element->content[i];
                     continue;
                 }
                 state = 1;
+            }
+            else {
+                (*start_w) = element->content[i];
+                start_w++;
             }
         }
         else if(state == 1) {
@@ -134,7 +139,43 @@ int _hdl_sprintf_bindings (char *buffer, struct HDL_Interface *interface, struct
                 savedChar = element->content[i + 1];
                 element->content[i + 1] = 0;
                 int lenw = 0;
+
                 struct HDL_Binding *binding = HDL_GetBinding(interface, element->bindings[bind_index]);
+                int intval = 0;
+                float floatval = 0;
+                char *strval = NULL;
+                switch (binding->type) {
+                    case HDL_TYPE_FLOAT:
+                        intval = *(float*)binding->data;
+                        floatval = *(float*)binding->data;
+                        break;
+                    case HDL_TYPE_BOOL:
+                    case HDL_TYPE_I8:
+                        intval = *(int8_t*)binding->data;
+                        floatval = *(int8_t*)binding->data;
+                        break;
+                    case HDL_TYPE_IMG:
+                    case HDL_TYPE_I16:
+                        intval = *(int16_t*)binding->data;
+                        floatval = *(int16_t*)binding->data;
+                        break;
+                    case HDL_TYPE_I32:
+                        intval = *(int32_t*)binding->data;
+                        floatval = *(int32_t*)binding->data;
+                        break;
+                    case HDL_TYPE_STRING:
+                        strval = (char*)binding->data;
+                        break;
+                    case HDL_TYPE_NULL:
+                    case HDL_TYPE_BIND:
+                    default:
+                        intval = 0;
+                        floatval = 0;
+                        strval = NULL;
+                        break;
+                }
+
+
                 switch(element->content[i]) {
                     case 'd':
                     case 'i':
@@ -144,7 +185,7 @@ int _hdl_sprintf_bindings (char *buffer, struct HDL_Interface *interface, struct
                     case 'X':
                     {
                         // Format INTEGER
-                        lenw = sprintf(start_w, start_r, *(int*)binding->data);
+                        lenw = sprintf(start_w, start_r, intval);
                         break;
                     }
                     case 'f':
@@ -153,25 +194,25 @@ int _hdl_sprintf_bindings (char *buffer, struct HDL_Interface *interface, struct
                     case 'g':
                     {
                         // Format FLOAT
-                        lenw = sprintf(start_w, start_r, *(float*)binding->data);
+                        lenw = sprintf(start_w, start_r, floatval);
                         break;
                     }
                     case 'p':
                     {
                         // Format POINTER
-                        lenw = sprintf(start_w, start_r, (void*)binding->data);
+                        lenw = sprintf(start_w, start_r, intval);
                         break;
                     }
                     case 'c':
                     {
                         // Format CHARACTER
-                        lenw = sprintf(start_w, start_r, *(char*)binding->data);
+                        lenw = sprintf(start_w, start_r, strval[0]);
                         break;
                     }
                     case 's':
                     {
                         // Format STRING
-                        lenw = sprintf(start_w, start_r, (char*)binding->data);
+                        lenw = sprintf(start_w, start_r, strval);
                         break;
                     }
                 }
@@ -407,6 +448,7 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
     uint16_t contH = 0;
 
     char content_buffer[256];
+    memset(content_buffer, 0, sizeof(content_buffer));
 
     if(element->content != NULL) {
         if(element->bind_count > 0) {
@@ -608,17 +650,17 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
         uint8_t count = data[(*pc)++];
 
         if(attrType == HDL_TYPE_BIND && attrKey != HDL_ATTR_BIND) {
-            // Bound attribute is always uint8_t
+
             el->bound_attrs[el->boundAttrCount].key = attrKey;
             el->bound_attrs[el->boundAttrCount].count = count;
             if(count == 1) {
-                el->bound_attrs[el->boundAttrCount].bind.value = *(uint8_t*)&data[*pc];
-                (*pc)++;
+                el->bound_attrs[el->boundAttrCount].bind.value = *(uint16_t*)&data[*pc];
+                (*pc) += 2;
             }
             else {
-                el->bound_attrs[el->boundAttrCount].bind.values = HMALLOC(sizeof(uint8_t) * count);
+                el->bound_attrs[el->boundAttrCount].bind.values = HMALLOC(sizeof(uint16_t) * count);
                 for(int i = 0; i < count; i++) {
-                    el->bound_attrs[el->boundAttrCount].bind.values[i] = *(uint8_t*)&data[*pc];
+                    el->bound_attrs[el->boundAttrCount].bind.values[i] = *(uint16_t*)&data[*pc];
                     (*pc)++;
                 }
             }
