@@ -1055,7 +1055,14 @@ int _hdl_checkBindings (struct HDL_Interface *interface) {
     int update = 0;
     for(int i = 0; i < HDL_CONF_MAX_BINDINGS; i++) {
         if(interface->bindings[i].id != 0xFFFF && interface->bindings[i].id == interface->_bindings_cpy[i].id) {
-            if(memcmp(interface->bindings[i].data, interface->_bindings_cpy[i].data, TYPE_SIZES[interface->bindings[i].type]) != 0) {
+            int diff = 0;
+            if(interface->bindings[i].type == HDL_TYPE_STRING) {
+                diff = strcmp(interface->bindings[i].data, interface->_bindings_cpy[i].data);
+            }
+            else {
+                diff = memcmp(interface->bindings[i].data, interface->_bindings_cpy[i].data, TYPE_SIZES[interface->bindings[i].type]);
+            }
+            if(diff != 0) {
                 update = 1;
                 memcpy(interface->_bindings_cpy[i].data, interface->bindings[i].data, TYPE_SIZES[interface->bindings[i].type]);
                 // Do not break here to update other bindings too
