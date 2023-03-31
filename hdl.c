@@ -387,8 +387,8 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
     interface->f_vline(element->x + element->width, element->y, element->height);
     */
 
-    uint8_t pad_x = 0;
-    uint8_t pad_y = 0;
+    int8_t pad_x = 0;
+    int8_t pad_y = 0;
 
     if(element->parent != NULL) {
         pad_x = element->parent->attrs.padding_x;
@@ -402,6 +402,13 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
         int16_t x2 = element->attrs.x + element->attrs.width - pad_x/2;
         int16_t y1 = element->attrs.y + pad_y/2;
         int16_t y2 = element->attrs.y + element->attrs.height - pad_y/2;
+
+        if(x2 == interface->width)
+            x2 = interface->width - 1;
+
+        if(y2 == interface->height)
+            y2 = interface->height - 1;
+
 
         // Set strokeWidth
         uint8_t strokeWidth_old = interface->strokeWidth;
@@ -488,6 +495,9 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
         }
     }
 
+    int8_t pad_dir_x = 1;
+    int8_t pad_dir_y = 1;
+
     // Y alignment, 0/default is middle
     switch(vtAlign) {
         case HDL_ALIGN_Y_TOP:
@@ -500,6 +510,7 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
         {
             // Bottom
             align_y = element->attrs.height - contH - pad_y/2;
+            pad_dir_y = -1;
             break;
         }
         default:
@@ -519,6 +530,7 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
         case HDL_ALIGN_X_RIGHT:
         {
             align_x = element->attrs.width - contW - pad_x/2;
+            pad_dir_x = -1;
             break;
         }
         default:
@@ -529,8 +541,8 @@ int _hdl_handleElement (struct HDL_Interface *interface, struct HDL_Element *ele
         }
     }
 
-    int16_t aligned_x = align_x + element->attrs.x + element->attrs.padding_x;
-    int16_t aligned_y = align_y + element->attrs.y + element->attrs.padding_y;
+    int16_t aligned_x = align_x + element->attrs.x + element->attrs.padding_x * pad_dir_x;
+    int16_t aligned_y = align_y + element->attrs.y + element->attrs.padding_y * pad_dir_y;
 
 
     if(interface->f_text != NULL && element->content != NULL) {
@@ -818,12 +830,12 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
                     if(count > 1) {
                         // Paddings seperately
                         if(attrType == HDL_TYPE_I8) {
-                            el->attrs.padding_x = (uint8_t)((uint8_t*)&data[(*pc)])[0];
-                            el->attrs.padding_y = (uint8_t)((uint8_t*)&data[(*pc)])[1];
+                            el->attrs.padding_x = (int8_t)((int8_t*)&data[(*pc)])[0];
+                            el->attrs.padding_y = (int8_t)((int8_t*)&data[(*pc)])[1];
                         }
                         else {
-                            el->attrs.padding_x = (uint16_t)((uint16_t*)&data[(*pc)])[0];
-                            el->attrs.padding_y = (uint16_t)((uint16_t*)&data[(*pc)])[1];
+                            el->attrs.padding_x = (int16_t)((int16_t*)&data[(*pc)])[0];
+                            el->attrs.padding_y = (int16_t)((int16_t*)&data[(*pc)])[1];
                         }
                     }
                     else {
@@ -881,8 +893,8 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
         interface->root = el;
         // Set width and height to maximum if root element
         if(el->attrs.height == 0 && el->attrs.width == 0) {
-            el->attrs.width = interface->width;
-            el->attrs.height = interface->height;
+            el->attrs.width = interface->width - 1;
+            el->attrs.height = interface->height - 1;
         }
     }
 
