@@ -1058,13 +1058,14 @@ int _hdl_checkBindings (struct HDL_Interface *interface) {
             int diff = 0;
             if(interface->bindings[i].type == HDL_TYPE_STRING) {
                 diff = strcmp(interface->bindings[i].data, interface->_bindings_cpy[i].data);
+                strcpy(interface->_bindings_cpy[i].data, interface->bindings[i].data);
             }
             else {
                 diff = memcmp(interface->bindings[i].data, interface->_bindings_cpy[i].data, TYPE_SIZES[interface->bindings[i].type]);
+                memcpy(interface->_bindings_cpy[i].data, interface->bindings[i].data, TYPE_SIZES[interface->bindings[i].type]);
             }
             if(diff != 0) {
                 update = 1;
-                memcpy(interface->_bindings_cpy[i].data, interface->bindings[i].data, TYPE_SIZES[interface->bindings[i].type]);
                 // Do not break here to update other bindings too
             }
         }
