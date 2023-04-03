@@ -133,6 +133,7 @@ int _hdl_sprintf_bindings (char *buffer, struct HDL_Interface *interface, struct
                     (*(start_w - 1)) = element->content[i];
                     continue;
                 }
+                start_r = &element->content[i];
                 state = 1;
             }
             else {

@@ -12,7 +12,7 @@
 // #define HDL_CONF_USE_KVP_ATTR
 
 // Max count of bindings
-#define HDL_CONF_MAX_BINDINGS   16
+#define HDL_CONF_MAX_BINDINGS   32
 
 // Max count of bound attributes
 #define HDL_CONF_MAX_ATTR_BINDINGS  8
