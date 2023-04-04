@@ -100,7 +100,8 @@ struct __attribute__((packed)) HDL_Header {
     uint8_t bitmapCount;
     uint8_t vartableCount;
     uint16_t elementCount;
-    uint8_t __padding[10]; // Reserved data
+    uint16_t fileSize;
+    uint8_t __padding[8]; // Reserved data
 };
 
 #ifdef HDL_CONF_USE_KVP_ATTR
