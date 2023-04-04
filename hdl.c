@@ -1162,10 +1162,13 @@ void HDL_Free (struct HDL_Interface *interface) {
         _hdl_freeElement(&interface->elements[i]);
     }
 #ifdef HDL_CONF_BIND_COPIES
+    /*
+    // These should be only freed when you want to free the whole interface, not only built elements
     for(int i = 0; i < HDL_CONF_MAX_BINDINGS; i++) {
         if(interface->_bindings_cpy[i].data != NULL)
             HFREE(interface->_bindings_cpy[i].data);
     }
+    */
 #endif
     // Free elements
     if(interface->elements != NULL) {
