@@ -690,7 +690,7 @@ int _hdl_buildElement (struct HDL_Interface *interface, struct HDL_Element *pare
                 el->bound_attrs[el->boundAttrCount].bind.values = HMALLOC(sizeof(uint16_t) * count);
                 for(int i = 0; i < count; i++) {
                     el->bound_attrs[el->boundAttrCount].bind.values[i] = *(uint16_t*)&data[*pc];
-                    (*pc)++;
+                    (*pc) += 2;
                 }
             }
             el->boundAttrCount++;
@@ -1094,20 +1094,29 @@ int HDL_Update (struct HDL_Interface *interface, uint64_t time) {
 
     uint32_t delta = (uint32_t)(time - interface->_lastUpdate);
 
+    uint8_t force_render = 0;
+
     // Too early
     if(delta < interface->minUpdateInterval && interface->_updated)
         return 0;
-    
-    // Force update
-    if((interface->maxUpdateInterval != 0 && delta >= interface->maxUpdateInterval) || !interface->_updated
-#ifdef HDL_CONF_BIND_COPIES
-        || _hdl_checkBindings(interface)
-#endif
-        ) {
-        // TODO: clear screen?
+
+    // Force render
+    if((interface->maxUpdateInterval != 0 && delta >= interface->maxUpdateInterval) || !interface->_updated)
+        force_render = 1;
+
+    // Check bindings
+    if(_hdl_checkBindings(interface) || force_render) {
+
         interface->f_clear(0, 0, interface->width, interface->height);
 
         _hdl_handleElement(interface, interface->root);
+
+        /*
+        // TODO:
+        if(!force_render) {
+            // Check only visible elements
+        }
+        */
 
         // Use partial refresh rather than full refresh if defined
         if(interface->f_renderPart != NULL) {

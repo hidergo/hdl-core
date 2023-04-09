@@ -164,8 +164,8 @@ struct HDL_Attrs {
 struct __attribute__((packed)) HDL_AttrBind {
     uint8_t key;
     union {
-        uint8_t value;
-        uint8_t *values;    
+        uint16_t value;
+        uint16_t *values;    
     } bind;
     uint8_t count;
 };
